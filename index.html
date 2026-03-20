@@ -1,1122 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Title Closing Cost Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Team Title — Closing Cost Estimator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-  :root {
-    --navy: #1a2744;
-    --navy-dark: #0f1a30;
-    --gold: #c8a96e;
-    --gold-light: #e8c88a;
-    --gold-pale: #f5edd8;
-    --white: #ffffff;
-    --off-white: #faf9f6;
-    --gray-light: #f0ede6;
-    --gray-mid: #d4cfc4;
-    --gray-text: #7a7468;
-    --text-dark: #1a1a1a;
-    --green: #2d6a4f;
-    --green-light: #e8f5ee;
-    --red: #8b2020;
-    --red-light: #fdf0f0;
-    --border: rgba(26,39,68,0.12);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--off-white);
-    color: var(--text-dark);
-    min-height: 100vh;
-  }
-  .header {
-    background: var(--navy);
-    padding: 0;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 40px,
-      rgba(200,169,110,0.03) 40px,
-      rgba(200,169,110,0.03) 41px
-    );
-  }
-  .header-inner {
-    position: relative;
-    z-index: 1;
-    padding: 32px 24px 28px;
-  }
-  .logo-area { margin-bottom: 12px; }
-  .logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--white);
-    letter-spacing: 0.5px;
-  }
-  .logo-divider {
-    width: 48px;
-    height: 2px;
-    background: var(--gold);
-    margin: 10px auto;
-  }
-  .header-subtitle {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--gold);
-    text-transform: uppercase;
-  }
-  .header-tagline {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    margin-top: 6px;
-    font-weight: 300;
-  }
-  .container {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 32px 20px 60px;
-  }
-  .card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .card-header {
-    background: var(--navy);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .card-header-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--gold);
-    color: var(--navy);
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .card-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--white);
-  }
-  .card-body { padding: 28px 24px; }
-  .field-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  .field-full { grid-column: 1 / -1; }
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--navy);
-    margin-bottom: 8px;
-  }
-  .field input, .field select {
-    width: 100%;
-    height: 44px;
-    border: 1.5px solid var(--gray-mid);
-    border-radius: 8px;
-    padding: 0 14px;
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    color: var(--text-dark);
-    background: var(--white);
-    transition: border-color 0.2s;
-    appearance: none;
-  }
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a2744' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
-  }
-  .field input:focus, .field select:focus {
-    outline: none;
-    border-color: var(--navy);
-    box-shadow: 0 0 0 3px rgba(26,39,68,0.08);
-  }
-  .field-hint {
-    font-size: 11px;
-    color: var(--gray-text);
-    margin-top: 5px;
-  }
-  .checkbox-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 4px;
-  }
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border: 1.5px solid var(--gray-mid);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .checkbox-item:hover { border-color: var(--navy); background: var(--gray-light); }
-  .checkbox-item input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--navy);
-    flex-shrink: 0;
-  }
-  .checkbox-item span {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text-dark);
-  }
-  .btn-primary {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    background: var(--navy);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-  }
-  .btn-primary:hover { background: var(--navy-dark); }
-  .btn-gold {
-    display: inline-block;
-    padding: 14px 28px;
-    background: var(--gold);
-    color: var(--navy);
-    border: none;
-    border-radius: 8px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-gold:hover { background: var(--gold-light); }
-  .btn-outline {
-    display: inline-block;
-    padding: 14px 28px;
-    background: transparent;
-    color: var(--navy);
-    border: 2px solid var(--navy);
-    border-radius: 8px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-outline:hover { background: var(--gray-light); }
-  .hidden { display: none !important; }
-  .quote-page {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .quote-top {
-    background: var(--navy);
-    padding: 28px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  .quote-logo-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--white);
-  }
-  .quote-logo-sub {
-    font-size: 10px;
-    letter-spacing: 2.5px;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-top: 3px;
-  }
-  .quote-meta { text-align: right; }
-  .quote-meta-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-  }
-  .quote-meta-val {
-    font-size: 13px;
-    color: var(--white);
-    font-weight: 400;
-    margin-top: 2px;
-  }
-  .quote-address-bar {
-    background: var(--gold-pale);
-    border-bottom: 1px solid rgba(200,169,110,0.3);
-    padding: 14px 32px;
-    display: flex;
-    gap: 40px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .quote-address-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray-text);
-  }
-  .quote-address-val {
-    font-size: 14px;
-    color: var(--navy);
-    font-weight: 700;
-    margin-top: 2px;
-  }
-  .quote-body { padding: 28px 32px; }
-  .quote-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--gold);
-    border-bottom: 1px solid var(--gold-pale);
-    padding-bottom: 8px;
-    margin-bottom: 0;
-    margin-top: 20px;
-  }
-  .quote-section-label:first-child { margin-top: 0; }
-  .fee-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 8px;
-  }
-  .fee-table tr { border-bottom: 1px solid var(--gray-light); }
-  .fee-table tr:last-child { border-bottom: none; }
-  .fee-table td {
-    padding: 11px 4px;
-    font-size: 14px;
-    color: var(--text-dark);
-  }
-  .fee-table td:last-child {
-    text-align: right;
-    font-weight: 700;
-    color: var(--navy);
-    white-space: nowrap;
-  }
-  .fee-table .subtotal-row { background: var(--gray-light); }
-  .fee-table .subtotal-row td {
-    font-weight: 700;
-    color: var(--navy);
-    padding: 12px 4px;
-  }
-  .total-bar {
-    background: var(--navy);
-    color: var(--white);
-    padding: 18px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .total-bar-label {
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-  .total-bar-amount {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--gold);
-  }
-  .disclaimer {
-    background: var(--gray-light);
-    padding: 14px 32px;
-    font-size: 11px;
-    color: var(--gray-text);
-    line-height: 1.6;
-  }
-  .quote-footer {
-    background: var(--navy-dark);
-    padding: 16px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-  }
-  .quote-footer-office { color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.6; }
-  .quote-footer-office strong { color: var(--gold); font-size: 13px; }
-  .cta-card {
-    background: var(--navy);
-    border-radius: 12px;
-    padding: 32px;
-    text-align: center;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  .cta-card::before {
-    content: '';
-    position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(200,169,110,0.08);
-  }
-  .cta-gold-tag {
-    display: inline-block;
-    background: var(--gold);
-    color: var(--navy);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 20px;
-    margin-bottom: 14px;
-  }
-  .cta-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    color: var(--white);
-    margin-bottom: 10px;
-    font-weight: 700;
-  }
-  .cta-subtitle {
-    font-size: 14px;
-    color: rgba(255,255,255,0.65);
-    margin-bottom: 24px;
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.7;
-  }
-  .cta-btns {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .upload-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .upload-body { padding: 28px 24px; }
-  .upload-zone {
-    border: 2px dashed var(--gray-mid);
-    border-radius: 10px;
-    padding: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 16px;
-    background: var(--off-white);
-  }
-  .upload-zone:hover { border-color: var(--navy); background: var(--gray-light); }
-  .upload-zone-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 12px;
-    background: var(--gold-pale);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .upload-zone p { font-size: 14px; color: var(--gray-text); }
-  .upload-zone strong { color: var(--navy); }
-  .file-list { margin-top: 12px; }
-  .file-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: var(--green-light);
-    border-radius: 8px;
-    margin-bottom: 8px;
-  }
-  .file-item-name { font-size: 13px; font-weight: 700; color: var(--green); flex: 1; }
-  .file-item-remove {
-    font-size: 18px;
-    color: var(--red);
-    cursor: pointer;
-    background: none;
-    border: none;
-    line-height: 1;
-  }
-  .success-card {
-    background: var(--green-light);
-    border: 1px solid rgba(45,106,79,0.25);
-    border-radius: 12px;
-    padding: 32px;
-    text-align: center;
-    margin-bottom: 24px;
-  }
-  .success-icon {
-    width: 56px;
-    height: 56px;
-    background: var(--green);
-    border-radius: 50%;
-    margin: 0 auto 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .success-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: var(--green);
-    margin-bottom: 8px;
-  }
-  .success-sub { font-size: 14px; color: var(--gray-text); line-height: 1.6; }
-  .print-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    background: var(--white);
-    color: var(--navy);
-    border: 1.5px solid var(--navy);
-    border-radius: 8px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 16px;
-  }
-  .print-btn:hover { background: var(--gray-light); }
-  .action-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-  .progress-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 28px;
-    align-items: center;
-  }
-  .progress-step {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-  }
-  .progress-dot {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--gray-mid);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--white);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .progress-dot.active { background: var(--navy); }
-  .progress-dot.done { background: var(--green); }
-  .progress-label { font-size: 11px; font-weight: 700; color: var(--gray-text); letter-spacing: 0.5px; }
-  .progress-line { flex: 1; height: 1px; background: var(--gray-mid); }
-  @media (max-width: 600px) {
-    .field-grid { grid-template-columns: 1fr; }
-    .checkbox-group { grid-template-columns: 1fr; }
-    .quote-top { flex-direction: column; }
-    .quote-footer { flex-direction: column; }
-    .cta-btns { flex-direction: column; }
-    .total-bar { flex-direction: column; gap: 6px; text-align: center; }
-  }
-  @media print {
-    body { background: white; }
-    .container { padding: 0; }
-    .no-print { display: none !important; }
-    .quote-page { box-shadow: none; border: 1px solid #ddd; }
-    .card { display: none; }
-    .cta-card { display: none; }
-    .upload-card { display: none; }
-    .success-card { display: none; }
-    .action-bar { display: none; }
-    .progress-bar { display: none; }
-  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#FAF6EE;-webkit-font-smoothing:antialiased}
+  @media print{.no-print{display:none!important}body{background:#fff!important}}
+  input:focus,select:focus,textarea:focus{border-color:#C9952A!important;outline:none;box-shadow:0 0 0 3px rgba(201,149,42,0.15)}
 </style>
 </head>
 <body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState}=React;
 
-<div class="header">
-  <div class="header-inner">
-    <div class="logo-area">
-      <div class="logo-text">TEAM TITLE</div>
-      <div class="logo-divider"></div>
-      <div class="header-subtitle">Closing Cost Calculator</div>
-    </div>
-    <div class="header-tagline">Where you come to close and find your way home.</div>
-  </div>
-</div>
+/* ================================================================
+   TEAM TITLE — CLOSING COST ESTIMATOR  V4
+   EmailJS Integration + Property Tax Estimator
+   ================================================================ */
 
-<div class="container">
+/* ── EmailJS Configuration ── */
+const EMAILJS_PUBLIC_KEY="8HvMoh-JbEya3rMvJ";
+const EMAILJS_SERVICE_ID="service_r3ym1ot";
+const EMAILJS_ORDER_TEMPLATE="template_lg5lgpz";
+const EMAILJS_LEAD_TEMPLATE="template_itjv7vr";
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
-  <div class="progress-bar no-print" id="progressBar">
-    <div class="progress-step">
-      <div class="progress-dot active" id="dot1">1</div>
-      <div class="progress-label">Your Info</div>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step">
-      <div class="progress-dot" id="dot2">2</div>
-      <div class="progress-label">Property Details</div>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step">
-      <div class="progress-dot" id="dot3">3</div>
-      <div class="progress-label">Your Quote</div>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step">
-      <div class="progress-dot" id="dot4">4</div>
-      <div class="progress-label">Open Title</div>
-    </div>
-  </div>
-
-  <!-- STEP 1: Contact Info -->
-  <div id="step1" class="card">
-    <div class="card-header">
-      <div class="card-header-num">1</div>
-      <h2>Your Contact Information</h2>
-    </div>
-    <div class="card-body">
-      <div class="field-grid">
-        <div class="field">
-          <label>First Name</label>
-          <input type="text" id="firstName" placeholder="First name">
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="lastName" placeholder="Last name">
-        </div>
-        <div class="field">
-          <label>Email Address</label>
-          <input type="email" id="userEmail" placeholder="your@email.com">
-        </div>
-        <div class="field">
-          <label>Phone Number</label>
-          <input type="tel" id="userPhone" placeholder="(985) 000-0000">
-        </div>
-        <div class="field field-full">
-          <label>Your Role in This Transaction</label>
-          <select id="userRole">
-            <option value="">Select your role...</option>
-            <option value="buyer">Buyer</option>
-            <option value="seller">Seller</option>
-            <option value="realtor">Realtor / Agent</option>
-            <option value="lender">Lender</option>
-            <option value="investor">Investor</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 2: Property Details -->
-  <div id="step2" class="card">
-    <div class="card-header">
-      <div class="card-header-num">2</div>
-      <h2>Property &amp; Transaction Details</h2>
-    </div>
-    <div class="card-body">
-      <div class="field-grid">
-        <div class="field field-full">
-          <label>Team Title Office Location</label>
-          <select id="officeLocation">
-            <option value="">Select office...</option>
-            <option value="baton_rouge">Baton Rouge, Louisiana</option>
-            <option value="mandeville">Mandeville, Louisiana</option>
-            <option value="metairie">Metairie, Louisiana</option>
-            <option value="brookhaven">Brookhaven, Mississippi</option>
-            <option value="alabama">Alabama</option>
-          </select>
-        </div>
-        <div class="field field-full">
-          <label>Property Address</label>
-          <input type="text" id="propertyAddress" placeholder="123 Main St, City, State 00000">
-        </div>
-        <div class="field">
-          <label>Purchase / Sales Price</label>
-          <input type="number" id="salePrice" placeholder="250000" min="0">
-        </div>
-        <div class="field">
-          <label>Loan Amount (if financed)</label>
-          <input type="number" id="loanAmount" placeholder="0 if cash" min="0" value="0">
-          <div class="field-hint">Enter 0 for cash transactions</div>
-        </div>
-        <div class="field field-full">
-          <label>Transaction Type</label>
-          <select id="transactionType">
-            <option value="purchase">Purchase (Buyer Financing)</option>
-            <option value="cash_purchase">Cash Purchase</option>
-            <option value="refinance">Refinance</option>
-            <option value="bond_for_deed">Bond for Deed</option>
-          </select>
-        </div>
-        <div class="field field-full">
-          <label>Property Type</label>
-          <select id="propertyType">
-            <option value="sfr">Single-Family Residential</option>
-            <option value="condo">Condo / Townhome</option>
-            <option value="multi">Multi-Family (2–4 units)</option>
-            <option value="commercial">Commercial</option>
-            <option value="land">Land / Lot</option>
-          </select>
-        </div>
-        <div class="field field-full">
-          <label>Additional Services Needed</label>
-          <div class="checkbox-group">
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_owner_policy"> <span>Owner's Title Insurance Policy</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_lender_policy"> <span>Lender's Title Insurance Policy</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_survey"> <span>Survey / Plot Plan</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_hoa"> <span>HOA Estoppel Letter</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_flood"> <span>Flood Certification</span>
-            </label>
-            <label class="checkbox-item">
-              <input type="checkbox" id="chk_notary"> <span>Mobile Notary / Remote Closing</span>
-            </label>
-          </div>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="generateQuote()">Generate My Closing Cost Quote</button>
-      <p style="font-size:11px;color:var(--gray-text);margin-top:10px;text-align:center;">Estimates are provided for informational purposes. Final fees may vary based on transaction-specific details.</p>
-    </div>
-  </div>
-
-  <!-- QUOTE OUTPUT -->
-  <div id="quoteOutput" class="hidden">
-
-    <div class="quote-page" id="printableQuote">
-      <div class="quote-top">
-        <div>
-          <div class="quote-logo-text">TEAM TITLE</div>
-          <div style="width:36px;height:1.5px;background:var(--gold);margin:6px 0;"></div>
-          <div class="quote-logo-sub">Closing Fee Estimate</div>
-        </div>
-        <div class="quote-meta">
-          <div class="quote-meta-label">Quote Date</div>
-          <div class="quote-meta-val" id="qDate"></div>
-          <div class="quote-meta-label" style="margin-top:10px;">Quote Reference</div>
-          <div class="quote-meta-val" id="qRef"></div>
-          <div class="quote-meta-label" style="margin-top:10px;">Prepared For</div>
-          <div class="quote-meta-val" id="qName"></div>
-        </div>
-      </div>
-
-      <div class="quote-address-bar">
-        <div>
-          <div class="quote-address-label">Property</div>
-          <div class="quote-address-val" id="qAddress"></div>
-        </div>
-        <div>
-          <div class="quote-address-label">Office</div>
-          <div class="quote-address-val" id="qOffice"></div>
-        </div>
-        <div>
-          <div class="quote-address-label">Transaction</div>
-          <div class="quote-address-val" id="qType"></div>
-        </div>
-        <div>
-          <div class="quote-address-label">Sales Price</div>
-          <div class="quote-address-val" id="qPrice"></div>
-        </div>
-      </div>
-
-      <div class="quote-body">
-        <div class="quote-section-label">Title &amp; Settlement Fees</div>
-        <table class="fee-table" id="feeTable1"></table>
-
-        <div class="quote-section-label" id="govLabel">Government / Recording Fees</div>
-        <table class="fee-table" id="feeTable2"></table>
-
-        <div class="quote-section-label" id="addLabel">Additional Services</div>
-        <table class="fee-table" id="feeTable3"></table>
-      </div>
-
-      <div class="total-bar">
-        <div class="total-bar-label">Estimated Total Closing Costs</div>
-        <div class="total-bar-amount" id="qTotal"></div>
-      </div>
-
-      <div class="disclaimer">
-        <strong>Important Disclaimer:</strong> This is a good-faith estimate only. Actual closing costs may vary based on final lender instructions, payoff amounts, prorations, HOA fees, inspection fees, government recording fees at the time of closing, and other transaction-specific factors. This estimate does not include pre-paids, escrow deposits, or lender-required items. Contact your Team Title closing specialist for a detailed Closing Disclosure. &nbsp;|&nbsp; Louisiana: 985.327.7227 &nbsp;|&nbsp; teamtitlellc.com
-      </div>
-
-      <div class="quote-footer">
-        <div class="quote-footer-office" id="qFooterOffice"></div>
-        <div style="text-align:right;">
-          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);">Licensed Title Company</div>
-          <div style="font-family:'Playfair Display',serif;font-size:14px;color:var(--gold);margin-top:3px;">Team Title LLC</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">teamtitlellc.com</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="action-bar no-print">
-      <button class="print-btn" onclick="window.print()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
-        Print / Save as PDF
-      </button>
-      <span style="font-size:12px;color:var(--gray-text);">Use your browser's print dialog to save as PDF.</span>
-    </div>
-
-    <!-- CTA -->
-    <div class="cta-card no-print">
-      <div class="cta-gold-tag">Ready to Move Forward?</div>
-      <div class="cta-title">Ready to Open Title with Team Title?</div>
-      <div class="cta-subtitle">Our closing specialists are standing by to make your transaction smooth, stress-free, and on time. Open your order in minutes — we'll handle the rest.</div>
-      <div class="cta-btns">
-        <button class="btn-gold" onclick="showOpenTitle()">Yes — Open Title Now</button>
-        <button class="btn-outline" style="color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.35);" onclick="showNotInterested()">Not at This Time</button>
-      </div>
-    </div>
-
-    <!-- OPEN TITLE FORM -->
-    <div id="openTitleSection" class="upload-card hidden no-print">
-      <div class="card-header">
-        <div class="card-header-num">4</div>
-        <h2>Open Your Title Order</h2>
-      </div>
-      <div class="upload-body">
-        <p style="font-size:14px;color:var(--gray-text);margin-bottom:20px;line-height:1.7;">Upload your Purchase Agreement and/or Lender's Request for Title Commitment below. Your order will be routed directly to the correct Team Title office and a closing specialist will be in touch within one business day.</p>
-        <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
-          <div class="upload-zone-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#c8a96e" stroke-width="2" width="24" height="24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          </div>
-          <p><strong>Click to upload</strong> or drag &amp; drop files here</p>
-          <p style="margin-top:4px;font-size:12px;">Purchase Agreement · Lender's Title Commitment Request · PDF, DOCX, JPG accepted</p>
-          <input type="file" id="fileInput" style="display:none" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFiles(this.files)">
-        </div>
-        <div id="fileList" class="file-list"></div>
-        <div class="field" style="margin-top:16px;">
-          <label>Additional Notes for Your Closing Specialist</label>
-          <textarea id="orderNotes" style="width:100%;border:1.5px solid var(--gray-mid);border-radius:8px;padding:12px 14px;font-family:'Lato',sans-serif;font-size:14px;resize:vertical;min-height:80px;color:var(--text-dark);" placeholder="Closing date target, lender contact, special instructions..."></textarea>
-        </div>
-        <button class="btn-primary" style="margin-top:8px;" onclick="submitTitleOrder()">Submit My Title Order</button>
-      </div>
-    </div>
-
-    <!-- SUCCESS -->
-    <div id="successSection" class="success-card hidden no-print">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div class="success-title">Your Title Order Has Been Submitted!</div>
-      <div class="success-sub" id="successMsg"></div>
-    </div>
-
-    <!-- NOT INTERESTED -->
-    <div id="notInterestedSection" class="hidden no-print">
-      <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
-        <div style="font-size:13px;color:var(--gray-text);line-height:1.7;">No problem at all. Your quote has been saved above for your records. When you're ready to move forward, contact us anytime.</div>
-        <div style="margin-top:16px;font-size:13px;"><strong style="color:var(--navy);">Louisiana:</strong> <a href="tel:9853277227" style="color:var(--navy);">985.327.7227</a></div>
-        <div style="font-size:12px;color:var(--gray-text);margin-top:4px;"><a href="https://www.teamtitlellc.com" style="color:var(--gold);">teamtitlellc.com</a></div>
-      </div>
-    </div>
-
-  </div><!-- /quoteOutput -->
-
-</div><!-- /container -->
-
-<script>
-const OFFICES = {
-  baton_rouge: { name: "Baton Rouge, Louisiana", address: "Baton Rouge, LA", email: "BRorders@teamtitlellc.com", phone: "985.327.7227", state: "LA" },
-  mandeville:  { name: "Mandeville, Louisiana",  address: "Mandeville, LA",  email: "orders@teamtitlellc.com",   phone: "985.327.7227", state: "LA" },
-  metairie:    { name: "Metairie, Louisiana",     address: "Metairie, LA",    email: "JPorders@teamtitlellc.com", phone: "985.327.7227", state: "LA" },
-  brookhaven:  { name: "Brookhaven, Mississippi", address: "Brookhaven, MS", email: "BHorders@teamtitlellc.com", phone: "888.244.9417", state: "MS" },
-  alabama:     { name: "Alabama",                 address: "Alabama",         email: "acorders@teamtitlellc.com", phone: "888.244.9417", state: "AL" }
+const C={
+  navy:"#0B2545",navyLight:"#13315C",navyDark:"#081B33",
+  gold:"#C9952A",goldLight:"#E8C97A",goldBorder:"rgba(201,149,42,0.35)",
+  cream:"#FAF6EE",white:"#FFFFFF",offWhite:"#F7F5F0",
+  slate:"#4A5568",slateLight:"#718096",
+  border:"#D1D5DB",lightGray:"#F1F3F7",
+  green:"#0F6B3A",greenLight:"#E8F5EE",
+  amber:"#92400E",amberBg:"#FFFBEB",amberBorder:"#FDE68A",
 };
 
-const TRANSACTION_LABELS = { purchase: "Purchase (Financed)", cash_purchase: "Cash Purchase", refinance: "Refinance", bond_for_deed: "Bond for Deed" };
-const PROPERTY_LABELS    = { sfr: "Single-Family", condo: "Condo / Townhome", multi: "Multi-Family", commercial: "Commercial", land: "Land / Lot" };
+const OFFICES={
+  batonRouge:{name:"Baton Rouge, LA",state:"LA",parish:"East Baton Rouge",orderEmail:"brorders@teamtitlellc.com",phone:"(225) 456-8810"},
+  mandeville:{name:"Mandeville, LA",state:"LA",parish:"St. Tammany",orderEmail:"orders@teamtitlellc.com",phone:"(985) 727-7117"},
+  metairie:{name:"Metairie, LA",state:"LA",parish:"Jefferson",orderEmail:"JPorders@teamtitlellc.com",phone:"(504) 302-5765"},
+  brookhaven:{name:"Brookhaven, MS",state:"MS",parish:"Lincoln County",orderEmail:"bhorders@teamtitlellc.com",phone:"(601) 823-0044"},
+  alabama:{name:"Alabama (MHU)",state:"AL",parish:"varies",orderEmail:"acorders@teamtitlellc.com",phone:"(205) 555-0100"},
+  mhuMS:{name:"Mississippi (MHU)",state:"MS",parish:"varies",orderEmail:"bhorders@teamtitlellc.com",phone:"(601) 823-0044"},
+};
 
-let uploadedFiles = [];
-let lastQuoteData = null;
+const FEES={batonRouge:{purchase:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:250},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:65},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:125},{l:"Recording Service Fee (2 filings)",a:40},{l:"Notary Fee",a:125}],cashSale:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:225},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:65},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:125},{l:"Notary Fee",a:125},{l:"Recording Service Fee",a:20}],refinance:[{l:"Abstract/Title Search",a:250},{l:"Attorney Title Examination",a:175},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:65},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:75},{l:"Notary Fee",a:150},{l:"Recording Service Fee",a:40},{l:"Payoff Processing/Cancellation Service Fee",a:155}]},mandeville:{purchase:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:225},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:60},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:150},{l:"Notary Fee",a:150},{l:"Recording Service Fee",a:50}],cashSale:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:225},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:65},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:150},{l:"Notary Fee",a:150}],refinance:[{l:"Abstract/Title Search",a:250},{l:"Attorney Title Examination",a:200},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:60},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:100},{l:"Notary Fee",a:125},{l:"Payoff Processing/Cancellation Service Fee",a:155},{l:"Recording Service Fee",a:25}]},metairie:{purchase:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:225},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:60},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:150},{l:"Notary Fee",a:150},{l:"Recording Service Fee",a:50}],cashSale:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:225},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:65},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:150},{l:"Notary Fee",a:150}],refinance:[{l:"Abstract/Title Search",a:250},{l:"Attorney Title Examination",a:200},{l:"Bank Wire Fee (per wire)",a:35},{l:"Courier Fee (per package)",a:60},{l:"Digital Storage/Archive Fee",a:30},{l:"Document Preparation",a:100},{l:"Notary Fee",a:125},{l:"Payoff Processing/Cancellation Service Fee",a:155},{l:"Recording Service Fee",a:25}]},brookhaven:{purchase:[{l:"Abstract/Title Search",a:300},{l:"Attorney Title Examination",a:275},{l:"Bank Wire Fee (per wire)",a:35},{l:"Closing/Settlement Fee",a:350},{l:"Commitment Binder Fee/Title",a:175},{l:"Courier Fee (per package)",a:60},{l:"Notary Fee",a:200},{l:"Warranty Deed Prep",a:100},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:25}],cashSale:[{l:"Abstract/Title Search",a:300},{l:"Bank Wire Fee (per wire)",a:35},{l:"Closing/Settlement Fee",a:350},{l:"Notary Fee",a:200},{l:"Courier Fee (per package)",a:60},{l:"Document Preparation Fee",a:100},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:25}],refinance:[{l:"Abstract/Title Search",a:250},{l:"Bank Wire Fee (per wire)",a:35},{l:"Closing/Settlement Fee",a:300},{l:"Commitment Binder Fee/Title",a:175},{l:"Courier Fee (per package)",a:60},{l:"Notary Fee",a:200},{l:"Payoff Processing/Cancellation Service Fee",a:155},{l:"Document Preparation",a:100},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:25}]},mhuMS:{purchase:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:275},{l:"Bank Wire Fee (per wire)",a:35},{l:"Construction Draw/Update Fee",a:450},{l:"Settlement/Closing Fee",a:350},{l:"Courier Fee (3 packages)",a:180},{l:"Document Preparation",a:125},{l:"Mobile Notary",a:225},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:50}],refinance:[{l:"Abstract/Title Search",a:275},{l:"Attorney Title Examination",a:275},{l:"Bank Wire Fee (per wire)",a:35},{l:"Construction Draw/Update Fee",a:450},{l:"Settlement/Closing Fee",a:350},{l:"Courier Fee (3 packages)",a:180},{l:"Document Preparation",a:125},{l:"Mobile Notary",a:225},{l:"Recording Service Fee",a:50},{l:"Payoff Processing/Cancellation Service",a:155}]},alabama:{purchase:[{l:"Abstract/Title Search",a:275},{l:"Title Examination & Commitment Prep",a:300},{l:"Bank Wire Fee (per wire)",a:35},{l:"Closing Protection Coverage",a:25},{l:"Construction Draw/Update Fee",a:500},{l:"Settlement/Closing Fee",a:375},{l:"Courier Fee (3 packages)",a:180},{l:"Document Preparation",a:100},{l:"Mobile Notary",a:250},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:50}],refinance:[{l:"Abstract/Title Search",a:275},{l:"Title Examination & Commitment Prep",a:300},{l:"Bank Wire Fee (per wire)",a:35},{l:"Closing Protection Coverage",a:25},{l:"Construction Draw/Update Fee",a:500},{l:"Settlement/Closing Fee",a:375},{l:"Courier Fee (3 packages)",a:180},{l:"Document Preparation",a:100},{l:"Mobile Notary",a:250},{l:"Technology/Archive Fee",a:25},{l:"Recording Service Fee",a:50},{l:"Payoff Processing/Cancellation Service",a:155}]}};
 
-function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+const POT={LA:[{l:"8.1 Environmental Title Endorsement",a:50},{l:"Power of Attorney",a:100},{l:"9.3-06 CCR Title Endorsement",a:150},{l:"Mail Out Fee (does not include courier)",a:50},{l:"Bank Wire Fee (per additional wire)",a:35},{l:"Payoff Processing Service Fee (per additional payoff)",a:155},{l:"Title Search Update",a:75}],MS:[{l:"Power of Attorney",a:100},{l:"Mail Out Fee (does not include courier)",a:50},{l:"Bank Wire Fee (per additional wire)",a:35},{l:"Payoff Processing Service Fee (per additional payoff)",a:155},{l:"Title Search Update",a:75},{l:"Additional Courier (each)",a:60}],AL:[{l:"Power of Attorney",a:100},{l:"Mail Out Fee (does not include courier)",a:50},{l:"Bank Wire Fee (per additional wire)",a:35},{l:"Payoff Processing Service Fee (per additional payoff)",a:155},{l:"Title Search Update",a:75},{l:"Additional Courier (each)",a:60}]};
 
-function calcFees(salePrice, loanAmt, txType, propType, office) {
-  const fees = [], govFees = [];
-  const isMS = office && OFFICES[office] && OFFICES[office].state === 'MS';
-  const isAL = office && OFFICES[office] && OFFICES[office].state === 'AL';
+const REC={"East Baton Rouge":{m:235,d:135,lbl:"EBR Clerk of Court"},"St. Tammany":{m:210,d:110,lbl:"St. Tammany Clerk of Court"},Jefferson:{m:235,d:135,lbl:"Jefferson Parish Clerk of Court"},"Lincoln County":{m:46,d:26,lbl:"Lincoln Co. Chancery Clerk"},varies:{m:75,d:30,lbl:"County Clerk"}};
+const CPL_MAP={LA:25,MS:50,AL:25};
 
-  let closingFee = 495;
-  if (propType === 'commercial') closingFee = 895;
-  if (propType === 'multi') closingFee = 645;
-  if (txType === 'refinance') closingFee = 450;
-  fees.push({ name: 'Settlement / Closing Fee', amount: closingFee });
+/* ── Property Tax Data (Louisiana Parishes) ── */
+const PARISH_MILLAGE={
+  "East Baton Rouge":{totalMills:128.59,homesteadExemptMills:101.19,label:"East Baton Rouge Parish"},
+  "St. Tammany":{totalMills:105.42,homesteadExemptMills:82.12,label:"St. Tammany Parish"},
+  "Jefferson":{totalMills:126.85,homesteadExemptMills:99.55,label:"Jefferson Parish"},
+};
+const LA_HOMESTEAD_EXEMPTION=75000;
+const LA_ASSESSMENT_RATIO=0.10;
 
-  let titleSearch = 250;
-  if (propType === 'commercial') titleSearch = 550;
-  if (propType === 'land') titleSearch = 195;
-  fees.push({ name: 'Title Search & Examination', amount: titleSearch });
-
-  let docPrep = 150;
-  if (txType === 'bond_for_deed') docPrep = 250;
-  if (propType === 'commercial') docPrep = 350;
-  fees.push({ name: 'Document Preparation', amount: docPrep });
-  fees.push({ name: 'Title Update / Bring-Down', amount: 75 });
-  fees.push({ name: 'Wire Transfer Fee', amount: 35 });
-  fees.push({ name: 'Courier / Overnight Fee (est.)', amount: 45 });
-
-  if (isMS) {
-    govFees.push({ name: 'Deed Recording (MS)', amount: 52 });
-    if (loanAmt > 0) govFees.push({ name: 'Deed of Trust Recording (MS)', amount: 52 });
-  } else if (isAL) {
-    govFees.push({ name: 'Deed Recording (AL)', amount: 70 });
-    if (loanAmt > 0) govFees.push({ name: 'Mortgage Recording (AL)', amount: 70 });
-  } else {
-    govFees.push({ name: 'Act of Sale Recording (LA)', amount: 200 });
-    if (loanAmt > 0) govFees.push({ name: 'Mortgage Recording (LA)', amount: 200 });
-    const docTax = Math.max(1, Math.floor(salePrice / 2000));
-    govFees.push({ name: 'Documentary Transaction Tax (LA)', amount: docTax });
+function calcPropertyTax(purchasePrice,parish,applyHomestead){
+  const data=PARISH_MILLAGE[parish];
+  if(!data||!purchasePrice)return null;
+  const fmv=parseFloat(purchasePrice);
+  const assessedValue=fmv*LA_ASSESSMENT_RATIO;
+  if(!applyHomestead){
+    const annualTax=(assessedValue/1000)*data.totalMills;
+    return{assessedValue,taxableValue:assessedValue,annualTax:Math.round(annualTax*100)/100,monthlyTax:Math.round((annualTax/12)*100)/100,homesteadSavings:0,parish:data.label,millage:data.totalMills};
   }
-  govFees.push({ name: 'Lien / Judgment Search (Clerk of Court)', amount: 75 });
-
-  return { fees, govFees };
-}
-
-function generateQuote() {
-  const firstName = document.getElementById('firstName').value.trim();
-  const lastName  = document.getElementById('lastName').value.trim();
-  const email     = document.getElementById('userEmail').value.trim();
-  const phone     = document.getElementById('userPhone').value.trim();
-  const office    = document.getElementById('officeLocation').value;
-  const address   = document.getElementById('propertyAddress').value.trim();
-  const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
-  const loanAmt   = parseFloat(document.getElementById('loanAmount').value) || 0;
-  const txType    = document.getElementById('transactionType').value;
-  const propType  = document.getElementById('propertyType').value;
-
-  if (!firstName || !email || !office || !address || !salePrice) {
-    alert('Please fill in your name, email, office location, property address, and sale price.');
-    return;
+  const exemptAmount=Math.min(assessedValue,LA_HOMESTEAD_EXEMPTION*LA_ASSESSMENT_RATIO);
+  const taxOnExemptPortion=((assessedValue-exemptAmount)/1000)*data.homesteadExemptMills;
+  const taxOnNonExemptMills=(assessedValue/1000)*(data.totalMills-data.homesteadExemptMills);
+  let annualTax;
+  if(assessedValue<=LA_HOMESTEAD_EXEMPTION*LA_ASSESSMENT_RATIO){
+    annualTax=(assessedValue/1000)*(data.totalMills-data.homesteadExemptMills);
+  }else{
+    annualTax=((assessedValue-(LA_HOMESTEAD_EXEMPTION*LA_ASSESSMENT_RATIO))/1000)*data.homesteadExemptMills+(assessedValue/1000)*(data.totalMills-data.homesteadExemptMills);
   }
-
-  const { fees, govFees } = calcFees(salePrice, loanAmt, txType, propType, office);
-
-  const addFees = [];
-  if (document.getElementById('chk_owner_policy').checked) {
-    let op = salePrice <= 100000 ? (salePrice/1000)*3.50 : (100000/1000)*3.50 + ((salePrice-100000)/1000)*2.50;
-    addFees.push({ name: "Owner's Title Insurance Policy (estimate)", amount: Math.round(op) });
-  }
-  if (document.getElementById('chk_lender_policy').checked) {
-    let lp = loanAmt > 0
-      ? (loanAmt <= 100000 ? (loanAmt/1000)*3.00 : (100000/1000)*3.00 + ((loanAmt-100000)/1000)*2.00)
-      : 150;
-    addFees.push({ name: "Lender's Title Insurance Policy (estimate)", amount: Math.round(lp) });
-  }
-  if (document.getElementById('chk_survey').checked)  addFees.push({ name: 'Survey / Plot Plan', amount: 425 });
-  if (document.getElementById('chk_hoa').checked)     addFees.push({ name: 'HOA Estoppel Letter Fee', amount: 150 });
-  if (document.getElementById('chk_flood').checked)   addFees.push({ name: 'Flood Zone Certification', amount: 25 });
-  if (document.getElementById('chk_notary').checked)  addFees.push({ name: 'Mobile Notary / Remote Closing', amount: 150 });
-
-  const totalSettlement = fees.reduce((s,f) => s+f.amount, 0);
-  const totalGov        = govFees.reduce((s,f) => s+f.amount, 0);
-  const totalAdd        = addFees.reduce((s,f) => s+f.amount, 0);
-  const grandTotal      = totalSettlement + totalGov + totalAdd;
-
-  lastQuoteData = { firstName, lastName, email, phone, office, address, salePrice, loanAmt, txType, propType, fees, govFees, addFees, totalSettlement, totalGov, totalAdd, grandTotal };
-
-  const now = new Date();
-  document.getElementById('qDate').textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('qRef').textContent  = 'TT-' + now.getFullYear() + '-' + String(Math.floor(Math.random()*90000)+10000);
-  document.getElementById('qName').textContent = firstName + ' ' + lastName;
-  document.getElementById('qAddress').textContent = address || '—';
-  document.getElementById('qOffice').textContent  = OFFICES[office].name;
-  document.getElementById('qType').textContent    = TRANSACTION_LABELS[txType] + ' · ' + PROPERTY_LABELS[propType];
-  document.getElementById('qPrice').textContent   = fmt(salePrice) + (loanAmt > 0 ? ' (Loan: ' + fmt(loanAmt) + ')' : '');
-  document.getElementById('qTotal').textContent   = fmt(grandTotal);
-
-  function buildTable(tableId, rows, subtotalLabel, subtotalAmt) {
-    const t = document.getElementById(tableId);
-    t.innerHTML = '';
-    rows.forEach(r => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + r.name + '</td><td>' + fmt(r.amount) + '</td>';
-      t.appendChild(tr);
-    });
-    const tr = document.createElement('tr');
-    tr.className = 'subtotal-row';
-    tr.innerHTML = '<td>' + subtotalLabel + '</td><td>' + fmt(subtotalAmt) + '</td>';
-    t.appendChild(tr);
-  }
-
-  buildTable('feeTable1', fees, 'Settlement Subtotal', totalSettlement);
-  buildTable('feeTable2', govFees, 'Government Fees Subtotal', totalGov);
-
-  if (addFees.length > 0) {
-    buildTable('feeTable3', addFees, 'Additional Services Subtotal', totalAdd);
-  } else {
-    document.getElementById('feeTable3').innerHTML = '<tr><td colspan="2" style="color:var(--gray-text);font-style:italic;padding:11px 4px;font-size:13px;">No additional services selected.</td></tr>';
-  }
-
-  const officeInfo = OFFICES[office];
-  document.getElementById('qFooterOffice').innerHTML =
-    '<strong>' + officeInfo.name + '</strong><br>' + officeInfo.address + '<br>' + officeInfo.phone + ' · teamtitlellc.com';
-
-  document.getElementById('quoteOutput').classList.remove('hidden');
-  document.getElementById('quoteOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  setDotState(1, 'done');
-  setDotState(2, 'done');
-  setDotState(3, 'active');
+  const noExemptTax=(assessedValue/1000)*data.totalMills;
+  const savings=noExemptTax-annualTax;
+  return{assessedValue,taxableValue:assessedValue,annualTax:Math.round(annualTax*100)/100,monthlyTax:Math.round((annualTax/12)*100)/100,homesteadSavings:Math.round(savings*100)/100,parish:data.label,millage:data.totalMills};
 }
 
-function setDotState(num, state) {
-  const dot = document.getElementById('dot' + num);
-  dot.className = 'progress-dot ' + state;
-  if (state === 'done') dot.innerHTML = '&#10003;';
-}
+function laOwner(a){if(a<=0)return 0;const m=Math.ceil(a/1000)*1000;if(m<=12000)return 100;if(m<=50000)return 100+((m-12000)/1000)*5.4;if(m<=100000)return 305.2+((m-50000)/1000)*4.8;if(m<=500000)return 545.2+((m-100000)/1000)*4.5;if(m<=1e6)return 2345.2+((m-500000)/1000)*3.6;if(m<=2e6)return 4145.2+((m-1e6)/1000)*3;return 7145.2+((m-2e6)/1000)*2.7}
+function laLender(a){if(a<=0)return 0;const m=Math.ceil(a/1000)*1000;if(m<=12000)return 100;if(m<=50000)return 100+((m-12000)/1000)*4.2;if(m<=100000)return 259.6+((m-50000)/1000)*3.6;if(m<=500000)return 439.6+((m-100000)/1000)*3.3;if(m<=1e6)return 1759.6+((m-500000)/1000)*2.7;if(m<=2e6)return 3109.6+((m-1e6)/1000)*2.4;return 5509.6+((m-2e6)/1000)*2.1}
+function msOwner(a){if(a<=0)return 0;return Math.max(a<=1e6?(a/1000)*4:4000+((a-1e6)/1000)*2,150)}
+function msLender(a){if(a<=0)return 0;return Math.max(a<=1e6?(a/1000)*3:3000+((a-1e6)/1000)*1.5,150)}
+function msSimLender(oa,la){if(la<=oa)return 100;return 100+msLender(la-oa)}
+function msRefiLender(a){if(a<=0)return 0;return Math.max(a<=1e6?(a/1000)*2:2000+((a-1e6)/1000)*1,150)}
 
-function showOpenTitle() {
-  document.getElementById('openTitleSection').classList.remove('hidden');
-  document.getElementById('notInterestedSection').classList.add('hidden');
-  document.getElementById('openTitleSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setDotState(4, 'active');
-}
+const fmt=n=>"$"+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
 
-function showNotInterested() {
-  document.getElementById('notInterestedSection').classList.remove('hidden');
-  document.getElementById('openTitleSection').classList.add('hidden');
-  if (lastQuoteData) {
-    const d = lastQuoteData;
-    const office = OFFICES[d.office];
-    const subj = encodeURIComponent('HOT NEW SALES LEAD/OPPORTUNITY');
-    const body = encodeURIComponent(
-      'NEW LEAD ALERT — Team Title Closing Cost Calculator\n\n' +
-      'Name: ' + d.firstName + ' ' + d.lastName + '\n' +
-      'Email: ' + d.email + '\n' +
-      'Phone: ' + d.phone + '\n' +
-      'Role: ' + (document.getElementById('userRole').value || 'Not specified') + '\n\n' +
-      'PROPERTY DETAILS:\n' +
-      'Address: ' + d.address + '\n' +
-      'Office: ' + office.name + '\n' +
-      'Sale Price: ' + fmt(d.salePrice) + '\n' +
-      'Loan Amount: ' + (d.loanAmt > 0 ? fmt(d.loanAmt) : 'Cash') + '\n' +
-      'Transaction Type: ' + TRANSACTION_LABELS[d.txType] + '\n' +
-      'Property Type: ' + PROPERTY_LABELS[d.propType] + '\n\n' +
-      'ESTIMATED TOTAL CLOSING COSTS: ' + fmt(d.grandTotal) + '\n\n' +
-      'The user received a fee estimate but did not place an order. Follow up promptly!'
-    );
-    window.location.href = 'mailto:fridaygroup@teamtitlellc.com?subject=' + subj + '&body=' + body;
-  }
-}
+const DISCLAIMERS=[
+  "The title insurance premiums presented are NOT for Enhanced Eagle coverage. We can quote and issue an Eagle policy upon request. We recommend that you or your client consider the Enhanced Eagle coverage.",
+  "If Owner's Title Insurance is declined there will be an additional Title Opinion Fee of $500.00 charged.",
+  "The above are Estimates only and are subject to change depending on the particulars of the transaction.",
+  "The cost for any curative work that may be required is not included in this estimate.",
+  "The Mail Out Fee is a service fee and does not include any overnight courier fees.",
+];
 
-function handleDragOver(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').style.borderColor = 'var(--navy)';
-}
+const ROLES=["Buyer","Seller","Borrower","Realtor / Agent","Lender / Loan Officer","Attorney","Other"];
+const stripesBg='url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3Cpattern id=\'s\' width=\'40\' height=\'40\' patternUnits=\'userSpaceOnUse\' patternTransform=\'rotate(45)\'%3E%3Crect width=\'1\' height=\'40\' fill=\'rgba(255,255,255,0.04)\'/%3E%3C/pattern%3E%3C/defs%3E%3Crect fill=\'none\' width=\'40\' height=\'40\'/%3E%3Crect fill=\'url(%23s)\' width=\'40\' height=\'40\'/%3E%3C/svg%3E")';
 
-function handleDrop(e) {
-  e.preventDefault();
-  handleFiles(e.dataTransfer.files);
-  document.getElementById('dropZone').style.borderColor = '';
-}
+const inputSt={width:"100%",padding:"12px 14px",border:"1.5px solid "+C.goldBorder,borderRadius:6,fontSize:14,fontFamily:"'Segoe UI',sans-serif",background:C.white,boxSizing:"border-box",transition:"border 0.2s, box-shadow 0.2s"};
+const labelSt={fontSize:11,fontWeight:700,color:C.navy,textTransform:"uppercase",letterSpacing:1,marginBottom:5,display:"block"};
+const fieldBox={marginBottom:16};
+const row2={display:"grid",gridTemplateColumns:"1fr 1fr",gap:16};
+const btnP={padding:"14px 32px",border:"none",borderRadius:8,background:C.gold,color:C.navy,fontSize:15,fontWeight:700,cursor:"pointer",letterSpacing:0.5,transition:"all 0.2s",fontFamily:"'Segoe UI',sans-serif"};
+const btnS={padding:"14px 32px",border:"2px solid "+C.navy,borderRadius:8,background:C.white,color:C.navy,fontSize:15,fontWeight:700,cursor:"pointer",letterSpacing:0.5,transition:"all 0.2s",fontFamily:"'Segoe UI',sans-serif"};
+const cardSt={background:C.white,border:"1px solid "+C.goldBorder,borderRadius:"0 0 8px 8px",padding:"24px 24px 28px"};
 
-function handleFiles(files) {
-  Array.from(files).forEach(f => {
-    if (!uploadedFiles.find(u => u.name === f.name)) uploadedFiles.push(f);
-  });
-  renderFileList();
-}
+/* ═══════════════════════════════════════
+   STABLE COMPONENTS — DEFINED OUTSIDE APP
+   ═══════════════════════════════════════ */
 
-function renderFileList() {
-  const list = document.getElementById('fileList');
-  list.innerHTML = '';
-  uploadedFiles.forEach((f, i) => {
-    const item = document.createElement('div');
-    item.className = 'file-item';
-    item.innerHTML = '<span class="file-item-name">&#128196; ' + f.name + '</span>' +
-      '<button class="file-item-remove" onclick="removeFile(' + i + ')">&#215;</button>';
-    list.appendChild(item);
-  });
-}
-
-function removeFile(i) {
-  uploadedFiles.splice(i, 1);
-  renderFileList();
-}
-
-function submitTitleOrder() {
-  if (!lastQuoteData) return;
-  const d = lastQuoteData;
-  const office = OFFICES[d.office];
-  const notes = document.getElementById('orderNotes').value.trim();
-  const subj = encodeURIComponent('New Title Order — ' + d.address + ' — ' + d.firstName + ' ' + d.lastName);
-  const body = encodeURIComponent(
-    'NEW TITLE ORDER — Team Title\n\n' +
-    'CONTACT:\nName: ' + d.firstName + ' ' + d.lastName + '\nEmail: ' + d.email + '\nPhone: ' + d.phone + '\n\n' +
-    'PROPERTY:\nAddress: ' + d.address + '\nSale Price: ' + fmt(d.salePrice) + '\nLoan Amount: ' + (d.loanAmt > 0 ? fmt(d.loanAmt) : 'Cash') + '\nTransaction: ' + TRANSACTION_LABELS[d.txType] + '\nProperty Type: ' + PROPERTY_LABELS[d.propType] + '\n\n' +
-    'ESTIMATED TOTAL: ' + fmt(d.grandTotal) + '\n\n' +
-    'NOTES:\n' + (notes || 'None provided') + '\n\n' +
-    (uploadedFiles.length > 0 ? 'DOCUMENTS: ' + uploadedFiles.map(f => f.name).join(', ') : 'No documents uploaded.') + '\n\nSubmitted via Team Title Closing Cost Calculator'
+function StepBar({step}){
+  return(
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"28px 20px",gap:0,flexWrap:"wrap"}}>
+      {[{n:1,t:"Your Info"},{n:2,t:"Property\nDetails"},{n:3,t:"Your Quote"},{n:4,t:"Open Title"}].map((s,i)=>(
+        <div key={s.n} style={{display:"flex",alignItems:"center"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:36,height:36,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,background:step>=s.n?C.gold:"#D1D5DB",color:step>=s.n?C.white:"#6B7280",transition:"all 0.3s"}}>{s.n}</div>
+            <span style={{fontSize:12,fontWeight:600,color:step>=s.n?C.navy:C.slateLight,whiteSpace:"pre-line",lineHeight:1.3}}>{s.t}</span>
+          </div>
+          {i<3&&<div style={{width:60,height:2,background:step>s.n?C.gold:"#D1D5DB",margin:"0 8px",transition:"all 0.3s"}}/>}
+        </div>
+      ))}
+    </div>
   );
-  window.location.href = 'mailto:' + office.email + '?subject=' + subj + '&body=' + body;
-
-  document.getElementById('openTitleSection').classList.add('hidden');
-  document.getElementById('successSection').classList.remove('hidden');
-  document.getElementById('successMsg').innerHTML =
-    'Your order has been routed to our <strong>' + office.name + '</strong> team at <strong>' + office.email + '</strong>. ' +
-    'A closing specialist will reach out within one business day. Welcome to the Team Title family!<br><br>' +
-    '<strong>Questions?</strong> Call us at ' + office.phone;
-  document.getElementById('successSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setDotState(4, 'done');
 }
+
+function SecHead({num,children}){
+  return(
+    <div style={{background:C.navy,padding:"14px 24px",borderRadius:"8px 8px 0 0",display:"flex",alignItems:"center",gap:12,marginTop:24}}>
+      <div style={{width:30,height:30,borderRadius:"50%",background:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:C.white,flexShrink:0}}>{num}</div>
+      <span style={{color:C.white,fontSize:16,fontWeight:700,fontStyle:"italic"}}>{children}</span>
+    </div>
+  );
+}
+
+function Wrap({step,children}){
+  return(
+    <div style={{minHeight:"100vh",background:C.cream,fontFamily:"'Georgia','Times New Roman',serif"}}>
+      <div style={{background:C.navy,backgroundImage:stripesBg,padding:"40px 20px 32px",textAlign:"center"}}>
+        <h1 style={{margin:0,fontSize:42,fontWeight:800,color:C.white,letterSpacing:3,fontFamily:"'Georgia','Times New Roman',serif",textTransform:"uppercase"}}>Team Title</h1>
+        <div style={{width:48,height:3,background:C.gold,margin:"12px auto"}}/>
+        <div style={{fontSize:13,color:C.gold,letterSpacing:4,textTransform:"uppercase",fontWeight:600,marginTop:8}}>Closing Cost Estimator</div>
+        <div style={{fontSize:14,color:"rgba(255,255,255,0.55)",marginTop:6,fontStyle:"italic"}}>Where you come to close and find your way home.</div>
+      </div>
+      <div style={{maxWidth:780,margin:"0 auto",padding:"0 16px 48px"}}>
+        <StepBar step={step}/>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function QSH({children}){return <div style={{fontSize:13,fontWeight:700,color:C.navy,textTransform:"uppercase",letterSpacing:0.6,marginTop:24,marginBottom:8,borderBottom:"2px solid "+C.gold,paddingBottom:6,fontFamily:"'Segoe UI',sans-serif"}}>{children}</div>}
+function QL({l,a}){return <div style={{display:"flex",justifyContent:"space-between",padding:"5px 0",fontSize:13,color:C.slate,borderBottom:"1px solid "+C.lightGray,fontFamily:"'Segoe UI',sans-serif"}}><span>{l}</span><span style={{fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{fmt(a)}</span></div>}
+function QT({l,a}){return <div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",marginTop:4,fontSize:14,fontWeight:700,color:C.navy,borderTop:"2px solid "+C.navy,fontFamily:"'Segoe UI',sans-serif"}}><span>{l}</span><span>{fmt(a)}</span></div>}
+
+/* ═══════════════════════════════════════
+   APP COMPONENT
+   ═══════════════════════════════════════ */
+
+function App(){
+  const[step,setStep]=useState(1);
+  const[f,sF]=useState({firstName:"",lastName:"",email:"",phone:"",role:"",office:"",txType:"",propertyAddress:"",city:"",stateField:"",zip:"",purchasePrice:"",loanAmount:"",closingDate:""});
+  const[quote,setQuote]=useState(null);
+  const[orderSent,setOrderSent]=useState(false);
+  const[leadSent,setLeadSent]=useState(false);
+  const[sending,setSending]=useState(false);
+  const[sendError,setSendError]=useState("");
+  const[files,setFiles]=useState([]);
+  const[notes,setNotes]=useState("");
+  const[applyHomestead,setApplyHomestead]=useState(true);
+
+  /* KEY FIX: use functional updater so closure doesn't go stale */
+  const up=(k)=>(e)=>{const v=e.target.value;sF(prev=>({...prev,[k]:v}))};
+
+  const txOpts=()=>{
+    if(!f.office)return[];
+    if(f.office==="alabama"||f.office==="mhuMS")return[{v:"purchase",l:"Financed Purchase (MHU)"},{v:"refinance",l:"Refinance (MHU)"}];
+    return[{v:"purchase",l:"Financed Purchase"},{v:"cashSale",l:"Cash Sale (No Financing)"},{v:"refinance",l:"Refinance"}];
+  };
+
+  const canStep2=f.firstName&&f.lastName&&f.email&&f.phone&&f.role;
+  const needsPrice=f.txType&&f.txType!=="refinance";
+  const needsLoan=f.txType&&f.txType!=="cashSale";
+  const canStep3=f.office&&f.txType&&f.propertyAddress&&(needsPrice?f.purchasePrice:true)&&(needsLoan?f.loanAmount:true);
+
+  const buildQuote=()=>{
+    const off=OFFICES[f.office];const st=off.state;
+    const fees=(FEES[f.office]?.[f.txType]||[]).map(x=>({label:x.l,amount:x.a}));
+    const feesTotal=fees.reduce((s,x)=>s+x.amount,0);
+    const price=parseFloat(f.purchasePrice)||0;const loan=parseFloat(f.loanAmount)||0;
+    const isPurch=f.txType==="purchase",isCash=f.txType==="cashSale";
+    let op=0,lp=0,cpl=0,simNote="";
+    if(st==="LA"){if(isPurch){op=laOwner(price);lp=laLender(loan);simNote="Owner's & Lender's policies simultaneously issued"}else if(isCash){op=laOwner(price)}else{lp=laLender(loan)}cpl=CPL_MAP.LA}
+    else if(st==="MS"){if(isPurch){op=msOwner(price);lp=msSimLender(price,loan);simNote="Simultaneous issue credit applied to Lender's policy"}else if(isCash){op=msOwner(price)}else{lp=msRefiLender(loan)}cpl=CPL_MAP.MS}
+    else{if(isPurch){op=msOwner(price);lp=msSimLender(price,loan);simNote="Simultaneous issue credit applied"}else{lp=msRefiLender(loan)}cpl=CPL_MAP.AL}
+    const tiTotal=Math.ceil(op)+Math.ceil(lp)+cpl;
+    const rec=REC[off.parish]||REC.varies;let ri=[];
+    if(isPurch){ri.push({label:"Recordation of Mortgage/Deed of Trust (est. 25 pgs)",amount:rec.m},{label:"Recordation of Cash Sale/Warranty Deed (est. 4 pgs)",amount:rec.d})}
+    else if(isCash){ri.push({label:"Recordation of Cash Sale/Warranty Deed (est. 4 pgs)",amount:rec.d})}
+    else{ri.push({label:"Recordation of Mortgage/Deed of Trust (est. 25 pgs)",amount:rec.m})}
+    if(f.office==="mhuMS"||f.office==="alabama")ri.push({label:"Acknowledgment from DOR Filing",amount:26});
+    const recTotal=ri.reduce((s,x)=>s+x.amount,0);
+    setQuote({off,fees,feesTotal,op:Math.ceil(op),lp:Math.ceil(lp),cpl,tiTotal,simNote,ri,recTotal,recLbl:rec.lbl,grand:feesTotal+tiTotal+recTotal,pot:POT[st]||POT.LA,st});
+    setStep(3);
+  };
+
+  /* ── EmailJS Send Helpers ── */
+  const buildEmailParams=()=>({
+    to_email:quote.off.orderEmail,
+    first_name:f.firstName,
+    last_name:f.lastName,
+    user_email:f.email,
+    user_phone:f.phone,
+    user_role:f.role,
+    property_address:f.propertyAddress,
+    city:f.city,
+    state:f.stateField,
+    zip:f.zip,
+    office_name:quote.off.name,
+    tx_type:f.txType==="purchase"?"Financed Purchase":f.txType==="cashSale"?"Cash Sale":"Refinance",
+    purchase_price:f.purchasePrice?fmt(f.purchasePrice):"N/A",
+    loan_amount:f.loanAmount?fmt(f.loanAmount):"N/A",
+    closing_date:f.closingDate||"Not specified",
+    fees_total:fmt(quote.feesTotal),
+    ti_total:fmt(quote.tiTotal),
+    rec_total:fmt(quote.recTotal),
+    grand_total:fmt(quote.grand),
+    user_notes:notes||"None",
+  });
+
+  const handleOrder=()=>{
+    setSending(true);setSendError("");
+    const params=buildEmailParams();
+    params.user_notes=(notes||"None")+"\n\nDocuments attached: "+(files.length?[...files].map(x=>x.name).join(", "):"None");
+    emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_ORDER_TEMPLATE,params)
+      .then(()=>{setSending(false);setOrderSent(true)})
+      .catch(err=>{setSending(false);setSendError("Failed to send order. Please call "+quote.off.phone+" directly. ("+err.text+")")});
+  };
+
+  const handleDecline=()=>{
+    setSending(true);setSendError("");
+    const params=buildEmailParams();
+    emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_LEAD_TEMPLATE,params)
+      .then(()=>{setSending(false);setLeadSent(true)})
+      .catch(err=>{setSending(false);setLeadSent(true)});
+  };
+
+  /* ── STEP 1 ── */
+  if(step===1) return(
+    <Wrap step={step}>
+      <SecHead num={1}>Your Contact Information</SecHead>
+      <div style={cardSt}>
+        <div style={row2}>
+          <div style={fieldBox}><label style={labelSt}>First Name</label><input style={inputSt} value={f.firstName} onChange={up("firstName")} placeholder="First name"/></div>
+          <div style={fieldBox}><label style={labelSt}>Last Name</label><input style={inputSt} value={f.lastName} onChange={up("lastName")} placeholder="Last name"/></div>
+        </div>
+        <div style={row2}>
+          <div style={fieldBox}><label style={labelSt}>Email Address</label><input type="email" style={inputSt} value={f.email} onChange={up("email")} placeholder="your@email.com"/></div>
+          <div style={fieldBox}><label style={labelSt}>Phone Number</label><input type="tel" style={inputSt} value={f.phone} onChange={up("phone")} placeholder="(985) 000-0000"/></div>
+        </div>
+        <div style={fieldBox}>
+          <label style={labelSt}>Your Role in This Transaction</label>
+          <select style={inputSt} value={f.role} onChange={up("role")}><option value="">Select your role...</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
+        </div>
+        <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
+          <button style={{...btnP,opacity:canStep2?1:0.45}} disabled={!canStep2} onClick={()=>setStep(2)}>Continue →</button>
+        </div>
+      </div>
+    </Wrap>
+  );
+
+  /* ── STEP 2 ── */
+  if(step===2) return(
+    <Wrap step={step}>
+      <SecHead num={2}>Property &amp; Transaction Details</SecHead>
+      <div style={cardSt}>
+        <div style={fieldBox}><label style={labelSt}>Property Address</label><input style={inputSt} value={f.propertyAddress} onChange={up("propertyAddress")} placeholder="123 Main Street"/></div>
+        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:16}}>
+          <div style={fieldBox}><label style={labelSt}>City</label><input style={inputSt} value={f.city} onChange={up("city")} placeholder="City"/></div>
+          <div style={fieldBox}><label style={labelSt}>State</label><input style={inputSt} value={f.stateField} onChange={up("stateField")} placeholder="LA"/></div>
+          <div style={fieldBox}><label style={labelSt}>ZIP</label><input style={inputSt} value={f.zip} onChange={up("zip")} placeholder="70000"/></div>
+        </div>
+        <div style={row2}>
+          <div style={fieldBox}>
+            <label style={labelSt}>Closing Office</label>
+            <select style={inputSt} value={f.office} onChange={(e)=>{const v=e.target.value;sF(prev=>({...prev,office:v,txType:""}))}}>
+              <option value="">Select office...</option>
+              <option value="batonRouge">Baton Rouge, LA</option>
+              <option value="mandeville">Mandeville, LA</option>
+              <option value="metairie">Metairie, LA</option>
+              <option value="brookhaven">Brookhaven, MS</option>
+              <option value="mhuMS">Mississippi — MHU (SW Funding)</option>
+              <option value="alabama">Alabama — MHU (SW Funding)</option>
+            </select>
+          </div>
+          <div style={fieldBox}>
+            <label style={labelSt}>Transaction Type</label>
+            <select style={inputSt} value={f.txType} onChange={up("txType")}>
+              <option value="">Select type...</option>
+              {txOpts().map(t=><option key={t.v} value={t.v}>{t.l}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={row2}>
+          {needsPrice&&<div style={fieldBox}><label style={labelSt}>Sale / Purchase Price</label><input type="number" style={inputSt} value={f.purchasePrice} onChange={up("purchasePrice")} placeholder="250000" min="0"/></div>}
+          {needsLoan&&<div style={fieldBox}><label style={labelSt}>Loan Amount</label><input type="number" style={inputSt} value={f.loanAmount} onChange={up("loanAmount")} placeholder="200000" min="0"/></div>}
+        </div>
+        <div style={fieldBox}><label style={labelSt}>Estimated Closing Date (optional)</label><input type="date" style={inputSt} value={f.closingDate} onChange={up("closingDate")}/></div>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:8}}>
+          <button style={btnS} onClick={()=>setStep(1)}>← Back</button>
+          <button style={{...btnP,opacity:canStep3?1:0.45}} disabled={!canStep3} onClick={buildQuote}>Generate My Estimate →</button>
+        </div>
+      </div>
+    </Wrap>
+  );
+
+  /* ── STEP 3 — QUOTE ── */
+  if(step===3&&quote) {
+    const showPropTax=quote.st==="LA"&&PARISH_MILLAGE[quote.off.parish]&&f.purchasePrice;
+    const propTax=showPropTax?calcPropertyTax(f.purchasePrice,quote.off.parish,applyHomestead):null;
+
+    return(
+    <Wrap step={step}>
+      <SecHead num={3}>Your Closing Cost Estimate</SecHead>
+      <div style={cardSt}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,padding:16,background:C.cream,borderRadius:8,fontSize:13,marginBottom:20,fontFamily:"'Segoe UI',sans-serif"}}>
+          <div><strong style={{color:C.navy}}>Prepared For:</strong> {f.firstName} {f.lastName}</div>
+          <div><strong style={{color:C.navy}}>Role:</strong> {f.role}</div>
+          <div><strong style={{color:C.navy}}>Property:</strong> {f.propertyAddress}{f.city?", "+f.city:""}{f.stateField?", "+f.stateField:""} {f.zip}</div>
+          <div><strong style={{color:C.navy}}>Office:</strong> {quote.off.name}</div>
+          <div><strong style={{color:C.navy}}>Transaction:</strong> {f.txType==="purchase"?"Financed Purchase":f.txType==="cashSale"?"Cash Sale":"Refinance"}</div>
+          {f.purchasePrice&&<div><strong style={{color:C.navy}}>Sale Price:</strong> {fmt(f.purchasePrice)}</div>}
+          {f.loanAmount&&<div><strong style={{color:C.navy}}>Loan Amount:</strong> {fmt(f.loanAmount)}</div>}
+          {f.closingDate&&<div><strong style={{color:C.navy}}>Est. Closing:</strong> {f.closingDate}</div>}
+        </div>
+
+        <QSH>Settlement &amp; Title Fees</QSH>
+        {quote.fees.map((x,i)=><QL key={i} l={x.label} a={x.amount}/>)}
+        <QT l="Settlement & Title Fees Subtotal" a={quote.feesTotal}/>
+
+        <QSH>Title Insurance Premiums</QSH>
+        {quote.op>0&&<QL l="ALTA Owner's Title Insurance Premium" a={quote.op}/>}
+        {quote.lp>0&&<QL l={"ALTA Lender's Title Insurance Premium"+(quote.simNote?" *":"")} a={quote.lp}/>}
+        {quote.cpl>0&&<QL l="Closing Protection Letter Premium" a={quote.cpl}/>}
+        {quote.simNote&&<div style={{fontSize:11,color:C.slateLight,fontStyle:"italic",marginTop:2,fontFamily:"'Segoe UI',sans-serif"}}>* {quote.simNote}</div>}
+        <QT l="Title Insurance Subtotal" a={quote.tiTotal}/>
+
+        <QSH>Governmental Recording Charges — {quote.recLbl}</QSH>
+        {quote.ri.map((x,i)=><QL key={i} l={x.label} a={x.amount}/>)}
+        <QT l="Recording Charges Subtotal" a={quote.recTotal}/>
+
+        <div style={{marginTop:28,padding:"18px 24px",background:C.navy,borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{color:C.white,fontSize:17,fontWeight:700}}>ESTIMATED TOTAL CLOSING COSTS</span>
+          <span style={{color:C.gold,fontSize:26,fontWeight:800,fontFamily:"'Georgia',serif"}}>{fmt(quote.grand)}</span>
+        </div>
+
+        <div style={{marginTop:28,padding:18,background:C.amberBg,border:"1px solid "+C.amberBorder,borderRadius:8}}>
+          <div style={{fontSize:12,fontWeight:700,color:C.amber,textTransform:"uppercase",letterSpacing:0.8,marginBottom:10,fontFamily:"'Segoe UI',sans-serif"}}>Other Potential Fees If Required or Requested — Not Included in Total Above</div>
+          {quote.pot.map((x,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#78350F",padding:"4px 0",borderBottom:i<quote.pot.length-1?"1px solid "+C.amberBorder:"none",fontFamily:"'Segoe UI',sans-serif"}}>
+              <span>{x.l}</span><span style={{fontWeight:600}}>{fmt(x.a)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{marginTop:20,padding:16,background:C.offWhite,borderRadius:8,fontSize:11,color:C.slateLight,lineHeight:1.7,fontFamily:"'Segoe UI',sans-serif"}}>
+          <strong style={{color:C.navy}}>Please Note:</strong>
+          {DISCLAIMERS.map((d,i)=><div key={i} style={{marginTop:4}}>• {d}</div>)}
+        </div>
+
+        <div style={{display:"flex",gap:12,marginTop:24,flexWrap:"wrap"}} className="no-print">
+          <button onClick={()=>window.print()} style={{...btnS,fontSize:13,flex:1,minWidth:140}}>🖨️ Print Estimate</button>
+          <button onClick={()=>{setStep(1);setQuote(null);setOrderSent(false);setLeadSent(false);setSendError("")}} style={{...btnS,fontSize:13,flex:1,minWidth:140,borderColor:C.border,color:C.slate}}>← New Estimate</button>
+        </div>
+
+        {/* ═══════════════════════════════════════
+            PROPERTY TAX ESTIMATOR — Separate Section
+            ═══════════════════════════════════════ */}
+        {showPropTax&&propTax&&(
+          <div style={{marginTop:36}}>
+            <div style={{background:C.navyLight,padding:"14px 24px",borderRadius:"8px 8px 0 0",display:"flex",alignItems:"center",gap:12}}>
+              <div style={{width:30,height:30,borderRadius:"50%",background:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:700,color:C.white,flexShrink:0}}>🏠</div>
+              <span style={{color:C.white,fontSize:16,fontWeight:700,fontStyle:"italic"}}>Estimated Annual Property Taxes — {propTax.parish}</span>
+            </div>
+            <div style={{background:C.white,border:"1px solid "+C.goldBorder,borderRadius:"0 0 8px 8px",padding:"24px 24px 28px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,fontFamily:"'Segoe UI',sans-serif"}}>
+                <label style={{fontSize:13,color:C.slate,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+                  <input type="checkbox" checked={applyHomestead} onChange={e=>setApplyHomestead(e.target.checked)} style={{width:16,height:16,accentColor:C.gold}}/>
+                  Apply Louisiana Homestead Exemption ($75,000)
+                </label>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13,color:C.slate,borderBottom:"1px solid "+C.lightGray,fontFamily:"'Segoe UI',sans-serif"}}>
+                <span>Fair Market Value (Purchase Price)</span><span style={{fontWeight:600}}>{fmt(f.purchasePrice)}</span>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13,color:C.slate,borderBottom:"1px solid "+C.lightGray,fontFamily:"'Segoe UI',sans-serif"}}>
+                <span>Assessed Value (10% of FMV)</span><span style={{fontWeight:600}}>{fmt(propTax.assessedValue)}</span>
+              </div>
+              {applyHomestead&&<div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13,color:C.green,borderBottom:"1px solid "+C.lightGray,fontFamily:"'Segoe UI',sans-serif"}}>
+                <span>Homestead Exemption Savings</span><span style={{fontWeight:600}}>−{fmt(propTax.homesteadSavings)}/yr</span>
+              </div>}
+              <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",fontSize:13,color:C.slate,borderBottom:"1px solid "+C.lightGray,fontFamily:"'Segoe UI',sans-serif"}}>
+                <span>Total Millage Rate</span><span style={{fontWeight:600}}>{propTax.millage} mills</span>
+              </div>
+
+              <div style={{marginTop:16,padding:"14px 20px",background:C.navy,borderRadius:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{color:C.white,fontSize:15,fontWeight:700}}>ESTIMATED ANNUAL PROPERTY TAX</div>
+                  <div style={{color:C.goldLight,fontSize:12,marginTop:2}}>Approximately {fmt(propTax.monthlyTax)} / month</div>
+                </div>
+                <span style={{color:C.gold,fontSize:24,fontWeight:800,fontFamily:"'Georgia',serif"}}>{fmt(propTax.annualTax)}</span>
+              </div>
+
+              <div style={{marginTop:12,padding:12,background:C.offWhite,borderRadius:6,fontSize:11,color:C.slateLight,lineHeight:1.6,fontFamily:"'Segoe UI',sans-serif"}}>
+                <strong style={{color:C.navy}}>Property Tax Disclaimer:</strong> This estimate is for informational purposes only and is based on approximate millage rates for {propTax.parish}. Actual property taxes are determined by the parish assessor's office and may vary based on the assessed value they assign, special assessments, and any applicable exemptions. Millage rates change annually. Contact the {propTax.parish} Assessor's Office for exact figures.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════
+            ORDER TITLE / DECLINE SECTION
+            ═══════════════════════════════════════ */}
+        {!orderSent&&!leadSent&&(
+          <div style={{marginTop:32,padding:28,background:C.greenLight,border:"2px solid "+C.green,borderRadius:12,textAlign:"center"}} className="no-print">
+            <div style={{fontSize:22,fontWeight:700,color:C.green,fontFamily:"'Georgia',serif"}}>Ready to Open Title?</div>
+            <div style={{fontSize:13,color:C.slate,marginTop:6,marginBottom:18,fontFamily:"'Segoe UI',sans-serif"}}>Upload your purchase agreement and/or lender's request for title commitment to get started.</div>
+            <label style={{display:"block",marginBottom:14,padding:"14px 16px",border:"2px dashed "+C.green,borderRadius:8,cursor:"pointer",fontSize:13,color:C.green,fontFamily:"'Segoe UI',sans-serif"}}>
+              📎 Click to Upload Documents
+              <input type="file" multiple style={{display:"none"}} onChange={e=>setFiles([...e.target.files])}/>
+            </label>
+            {files.length>0&&<div style={{fontSize:12,color:C.slate,marginBottom:10,fontFamily:"'Segoe UI',sans-serif"}}>{[...files].map(x=>x.name).join(", ")}</div>}
+            <textarea placeholder="Additional notes for your closing team..." value={notes} onChange={e=>setNotes(e.target.value)} style={{width:"100%",padding:12,border:"1px solid "+C.border,borderRadius:6,fontSize:13,minHeight:60,resize:"vertical",boxSizing:"border-box",fontFamily:"'Segoe UI',sans-serif",marginBottom:14}}/>
+            {sendError&&<div style={{color:"#DC2626",fontSize:13,marginBottom:10,fontFamily:"'Segoe UI',sans-serif"}}>{sendError}</div>}
+            <div style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap"}}>
+              <button onClick={handleOrder} disabled={sending} style={{...btnP,background:sending?"#999":C.green,color:C.white,padding:"14px 40px",fontSize:16,cursor:sending?"wait":"pointer"}}>{sending?"Sending...":"✓ Yes, Order Title"}</button>
+              <button onClick={handleDecline} disabled={sending} style={{...btnS,borderColor:C.border,color:C.slate,padding:"14px 32px",cursor:sending?"wait":"pointer"}}>Not Right Now</button>
+            </div>
+          </div>
+        )}
+
+        {orderSent&&(
+          <div style={{marginTop:28,padding:24,background:C.greenLight,borderRadius:12,textAlign:"center"}} className="no-print">
+            <div style={{fontSize:22,fontWeight:700,color:C.green,fontFamily:"'Georgia',serif"}}>✓ Order Submitted!</div>
+            <div style={{fontSize:13,color:C.slate,marginTop:8,fontFamily:"'Segoe UI',sans-serif"}}>Your order has been routed to our <strong>{quote.off.name}</strong> team at <strong>{quote.off.orderEmail}</strong>.</div>
+            <div style={{fontSize:13,color:C.slate,marginTop:4,fontFamily:"'Segoe UI',sans-serif"}}>A closing specialist will be in touch within one business day.</div>
+            <div style={{fontSize:14,color:C.navy,marginTop:12,fontWeight:600}}>Questions? Call {quote.off.phone}</div>
+          </div>
+        )}
+        {leadSent&&(
+          <div style={{marginTop:28,padding:24,background:C.amberBg,borderRadius:12,textAlign:"center"}} className="no-print">
+            <div style={{fontSize:20,fontWeight:700,color:C.amber,fontFamily:"'Georgia',serif"}}>Thank You!</div>
+            <div style={{fontSize:13,color:C.slate,marginTop:8,fontFamily:"'Segoe UI',sans-serif"}}>We appreciate your interest. A member of the Team Title team may follow up to see how we can assist with your closing needs.</div>
+            <div style={{fontSize:14,color:C.navy,marginTop:12,fontWeight:600}}>Questions? Call {quote.off.phone}</div>
+          </div>
+        )}
+      </div>
+    </Wrap>
+  );}
+
+  return null;
+}
+
+ReactDOM.render(<App/>,document.getElementById("root"));
 </script>
 </body>
 </html>
